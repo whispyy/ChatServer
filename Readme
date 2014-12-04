@@ -1,0 +1,103 @@
+    mtcs -- Serveur de chat multithreadé
+
+
+------------------------------
+ Les fichiers
+------------------------------------------------------------
+
+mtcs -- mtcs server
+    Point d'entrée du programme
+    Ecoute sur le port de connexion
+    Etablissement de la connexion par le serveur pour chaque client
+cnct -- connection
+    Gestion d'une connexion par un thread
+tools.{c,h} -- tools
+    outils divers
+config.h
+    configuration du programme
+
+------------------------------
+ Utilisation
+------------------------------------------------------------
+
+1- lancer le serveur
+    - depuis un terminal
+        % ./mtcs
+        Server open on port 8012
+        ...
+
+    - éventuellement en mode verbose
+        % ./mtcs -v
+        (2684396012) main(): serveur initialization
+        (2684396012) open_socket(): --> entering
+        (2684396012) open_socket(): socket creee
+        (2684396012) open_socket(): binding effectue
+        (2684396012) open_socket(): listen ok
+        (2684396012) open_socket(): -- exiting
+        Server open on port 8012
+        (2684396012) main(): server loop
+        (2684396012) create_cnct(): --> entering
+    - bien repérer le numéro du port de connexion au serveur (ici 8012)
+    - identifier aussi le nom de la machine ! (localhost pour la
+      machine locale peut suffire)
+
+2- lancer un client
+    - depuis un autre terminal
+        % telnet localhost 8012
+        Trying 127.0.0.1...
+        Connected to localhost.
+        Escape character is '^]'.
+        mtcs : bienvenu
+        foooooooooooooooo
+        foooooooooooooooo
+        FOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooo.............
+        FOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooo.............
+    - terminer par control-] puis quit
+        ^]
+        telnet> quit
+        Connection closed.
+
+3- lancer des clients
+    - depuis un troisième terminal
+    - avant d'avoir quitter le premier client
+        % telnet localhost 8012
+        Trying 127.0.0.1...
+        Connected to localhost.
+        Escape character is '^]'.
+    - on n'obtient pas le message d'invite tant que le serveur n'a pas
+      terminé avec le premier client...
+    - terminer le premier client (^] ou kill)
+    - le serveur prend en charge le deuxième client
+
+------------------------------
+ Travail à faire
+------------------------------------------------------------
+
+1- prise en charge de multiples clients.
+    - prendre en charge l'appel de la fonction repeater() par un
+      thread.
+    - garantir que les variables globales accédées par ce thread sont
+      bien protégées contre des accès concurrents par plusieurs
+      threads.
+
+2- ajout de statistiques
+    - fourniture d'une bibliothèque de gestion de statistiques (stat.h
+      et stat.c)
+    - faire en sorte qu'à la reception du signal SIGUSR1, le serveur
+      imprime des statistiques :
+        - nombre de clients
+        - nombre de lignes reçues
+        - nombre de lignes envoyées
+        - nombre maximal de client à un instant donné
+        - nombre maximal de lignes reçues d'un client
+        - nombre maximal de lignes envoyées à un client
+        - etc.
+    - les accès à la structure de données gardant les informations de
+      statistique doivent être protégés
+
+3- version robuste
+    - identifier un scénario de prise de verrous par un thread client
+      et par le traitant de signaux pouvant mener à une étreinte
+      fatale (deadlock)
+    - corriger cette erreur par la fourniture d'une bibliothèque de
+      verrous récursifs (rmtx.c et rmtx.h)
